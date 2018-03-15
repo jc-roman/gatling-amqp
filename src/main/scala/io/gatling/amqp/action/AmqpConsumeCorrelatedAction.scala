@@ -24,7 +24,7 @@ class AmqpConsumeCorrelatedAction(req: ConsumeRequest,
 
   val consumerActorForCorrelationId: ActorRef = {
     // single actor for all users in this scenario step
-    val name = "AmqpConsumerCorrelation"
+    val name = genName("AmqpConsumerCorrelation")
     amqp.system.actorOf(AmqpConsumerCorrelation.props(name, conv, amqp), name)
   }
 

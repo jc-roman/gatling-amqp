@@ -5,7 +5,6 @@ import io.gatling.amqp.config._
 import io.gatling.amqp.data._
 import io.gatling.amqp.event._
 import io.gatling.core.stats.StatsEngine
-import pl.project13.scala.rainbow._
 
 import scala.collection.mutable
 import scala.concurrent.duration._
@@ -85,7 +84,7 @@ class AmqpNacker(statsEngine: StatsEngine)(implicit amqp: AmqpProtocol) extends 
 
     private val contains = bit.contains _
     private def get(n: Int): AmqpPublishing = map.getOrElse(n,
-      throw new RuntimeException(s"[BUG] TracedQueue($name).get($n) not found: ${bitInfoFor(n)}".red))
+      throw new RuntimeException(s"[BUG] TracedQueue($name).get($n) not found: ${bitInfoFor(n)}"))
     private def bitInfoFor(n: Int): String = s"p=${publishedFact.size},c=${consumedFact.size} map(${map.contains(n)}), bit(${bit.contains(n)}), publishedFact(${publishedFact.contains(n)}), consumedFact(${consumedFact.contains(n)})"
 
     private val debugLogMax = 0  // disable
@@ -93,7 +92,7 @@ class AmqpNacker(statsEngine: StatsEngine)(implicit amqp: AmqpProtocol) extends 
     private def debugLog(method: String): Unit = {
       debugLogCnt += 1
       if (debugLogCnt <= debugLogMax) {
-        log.info(s"TracedQueue($name).$method called".red)
+        log.info(s"TracedQueue($name).$method called")
       }
     }
   }
@@ -130,10 +129,10 @@ class AmqpNacker(statsEngine: StatsEngine)(implicit amqp: AmqpProtocol) extends 
     case mes@ CheckTermination(interval) =>
       runningCount match {
         case 0 =>
-          log.debug(s"CheckTermination: all publish requests finished".green)
+          log.debug(s"CheckTermination: all publish requests finished")
           notifyTermination()
         case n =>
-          log.debug(s"CheckTermination: waiting $n confirmations. re-check after($interval)".yellow)
+          log.debug(s"CheckTermination: waiting $n confirmations. re-check after($interval)")
           import scala.concurrent.ExecutionContext.Implicits.global
           context.system.scheduler.scheduleOnce(interval, self, mes)  // retry again after interval
       }

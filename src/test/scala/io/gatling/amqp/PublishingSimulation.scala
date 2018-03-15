@@ -27,7 +27,7 @@ class PublishingSimulation extends Simulation {
   //val req = PublishRequestAsync("q1", body).persistent
 
   val scn  = scenario("AMQP Publish(ack)").repeat(1000) {
-    exec(amqp("Publish").publish("q1", body = Right(body)))
+    exec(amqp("Publish").publish("gatlingPublishingSimulation", body = Right(body)))
   }
 
   setUp(scn.inject(rampUsers(3) over (1 seconds))).protocols(amqpProtocol)

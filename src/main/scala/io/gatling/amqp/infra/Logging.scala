@@ -2,7 +2,6 @@ package io.gatling.amqp.infra
 
 import akka.actor._
 import com.typesafe.scalalogging.StrictLogging
-import pl.project13.scala.rainbow._
 
 trait Logging extends Actor with StrictLogging {
   protected lazy val className = getClass.getSimpleName
@@ -11,11 +10,11 @@ trait Logging extends Actor with StrictLogging {
 
   override def preStart(): Unit = {
     super.preStart()
-    log.info(s"amqp: Start actor `$className'".yellow)
+    log.info(s"amqp: Start actor `$className'")
   }
 
   override def postStop(): Unit = {
-    log.info(s"amqp: Stop actor `$className' $stopMessage".yellow)
+    log.info(s"amqp: Stop actor `$className' $stopMessage")
     super.postStop()
   }
 

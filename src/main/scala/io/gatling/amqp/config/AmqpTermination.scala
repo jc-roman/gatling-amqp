@@ -4,7 +4,6 @@ import akka.pattern.ask
 import akka.util.Timeout
 import io.gatling.amqp.data._
 import io.gatling.core.session.Session
-import pl.project13.scala.rainbow._
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -20,13 +19,13 @@ trait AmqpTermination { this: AmqpProtocol =>
   protected def awaitTerminationFor(session: Session): Unit = {
     // wait nacker to ensure all confirms has been fired
     Await.result((nacker ask WaitTermination(session))(publishTimeout), Duration.Inf) match {
-      case Success(m) => logger.debug(s"amqp: $m".green)
+      case Success(m) => logger.debug(s"amqp: $m")
       case Failure(e) => throw e
     }
 
     // wait consumers
     Await.result((router ask WaitTermination(session))(consumeTimeout), Duration.Inf) match {
-      case Success(m) => logger.debug(s"amqp: $m".green)
+      case Success(m) => logger.debug(s"amqp: $m")
       case Failure(e) => throw e
     }
   }

@@ -9,11 +9,10 @@ import io.gatling.amqp.config.AmqpProtocol
 import io.gatling.amqp.data.{AsyncConsumerRequest, ConsumeSingleMessageRequest}
 import io.gatling.amqp.event.{AmqpConsumeRequest, AmqpSingleConsumerPerStepRequest}
 import io.gatling.amqp.infra.AmqpConsumer.DeliveredMsg
-import io.gatling.commons.util.TimeHelper
-import io.gatling.commons.util.TimeHelper.nowMillis
+import io.gatling.commons.util.ClockSingleton
+import io.gatling.commons.util.ClockSingleton.nowMillis
 import io.gatling.core.Predef._
 import io.gatling.core.action.Action
-import pl.project13.scala.rainbow.Rainbow._
 
 import scala.collection.mutable
 import scala.concurrent.duration._
@@ -114,7 +113,7 @@ class AmqpConsumerCorrelation(actorName: String,
 
   override def receive = super.receive.orElse {
     case AmqpConsumerCorrelation.TimeoutCheck =>
-      val now = TimeHelper.nowMillis
+      val now = ClockSingleton.nowMillis
       routingMap.foreach {
         case (corrId, req) => {
           val diff = FiniteDuration.apply(now - req.requestTimestamp, TimeUnit.MILLISECONDS)
@@ -146,7 +145,7 @@ class AmqpConsumerCorrelation(actorName: String,
           }
           log.warn("{}Received message witch correlationId={}, which has not been requested. I have waited {} but no request came from scenario. Going to ignore that message. " +
             "Possible problem is that you use same queue in multiple steps of scenario or your queue is spammed by some unrelated messages. msg={}.",
-            a.asInstanceOf[AnyRef], rd.correlationId.yellow.asInstanceOf[AnyRef], retryDelay.asInstanceOf[AnyRef], new String(rd.deliveredMsg.body).blue.asInstanceOf[AnyRef])
+            a.asInstanceOf[AnyRef], rd.correlationId.asInstanceOf[AnyRef], retryDelay.asInstanceOf[AnyRef], new String(rd.deliveredMsg.body).asInstanceOf[AnyRef])
           // Should I statsNg, when it is not KO for some step? Probably no.
           //statsNg(null.asInstanceOf[Session], deliveredAt, nowMillis, "consumeSingleWithCorrelationId", None, "No request was made for received message with correlationId=\"" + correlationId + "\". See log for more info.")
           unexpectedMsgLogged -= 1
@@ -181,14 +180,14 @@ class AmqpConsumerCorrelation(actorName: String,
             // register only once per queue
             val c = consumer(req.autoAck)
             val tag = channel.basicConsume(req.queueName, req.autoAck, c)
-            log.debug(s"Start basicConsume(${req.queueName}) [tag:$tag] for AmqpConsumerCorrelation.".yellow)
+            log.debug(s"Start basicConsume(${req.queueName}) [tag:$tag] for AmqpConsumerCorrelation.")
             tag
           })
           val actualCorrelationId: String = req.correlationId.get(session).get
           val reqNameEvaluated: String = req.requestName.apply(session).get
           routingMap.put(actualCorrelationId, AmqpConsumerCorrelation.RequestWithCorrelation(session, next, req.saveResultToSession, requestTimestamp, reqNameEvaluated))
           log.trace("We have marked request for rpc response with correlationId={};next={}.",
-            actualCorrelationId.red.asInstanceOf[AnyRef],
+            actualCorrelationId.asInstanceOf[AnyRef],
             next.asInstanceOf[AnyRef])
       }
   }
@@ -215,7 +214,7 @@ class AmqpConsumerCorrelation(actorName: String,
       x =>
         val tag = x._2
         channel.basicCancel(tag)
-        log.debug(s"Cancel consumer($tag)".yellow)
+        log.debug(s"Cancel consumer($tag)")
     }
 
     // clean up routingMap and log statsNg for all waiting requests

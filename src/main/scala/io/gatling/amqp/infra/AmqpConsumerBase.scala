@@ -3,7 +3,6 @@ package io.gatling.amqp.infra
 import akka.actor.ActorRef
 import io.gatling.amqp.config.AmqpProtocol
 import io.gatling.amqp.data.WaitTermination
-import pl.project13.scala.rainbow._
 
 import scala.collection.mutable
 import scala.concurrent.duration._
@@ -70,12 +69,12 @@ abstract class AmqpConsumerBase(actorName: String)(implicit _amqp: AmqpProtocol)
       isFinished match {
         case true =>
           val msg = "all message have been delivered"
-          log.debug(msg.green)
+          log.debug(msg)
           notifyTermination(msg)
           shutdown()
         case false =>
           if (!notConsumedYet)
-            log.debug(s"CheckTermination: waiting delivered. re-check after($interval)".yellow)
+            log.debug(s"CheckTermination: waiting delivered. re-check after($interval)")
           context.system.scheduler.scheduleOnce(interval, self, mes) // retry again after interval
       }
   }

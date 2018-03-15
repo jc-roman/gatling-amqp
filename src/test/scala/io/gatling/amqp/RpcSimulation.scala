@@ -10,7 +10,6 @@ import io.gatling.amqp.infra.AmqpConsumer
 import io.gatling.amqp.infra.AmqpConsumer.DeliveredMsg
 import io.gatling.core.Predef._
 import org.slf4j.LoggerFactory
-import pl.project13.scala.rainbow._
 
 import scala.concurrent.duration._
 
@@ -60,8 +59,8 @@ class RpcSimulation extends Simulation {
               val msg = session(AmqpConsumer.LAST_CONSUMED_MESSAGE_KEY).as[DeliveredMsg]
               val replyTo = msg.properties.getReplyTo
               log.info("Going to reply to queue {} with message {}.",
-                replyTo.yellow.asInstanceOf[Any],
-                new String(msg.body).blue.asInstanceOf[Any])
+                replyTo.asInstanceOf[Any],
+                new String(msg.body).asInstanceOf[Any])
               replyTo
             },
             Left(session =>
@@ -73,7 +72,7 @@ class RpcSimulation extends Simulation {
               import scala.collection.JavaConversions._
               prop.headers(Map("statusCode" -> 200.asInstanceOf[AnyRef]))
               if (correlationId != null && correlationId.nonEmpty) {
-                log.info("Going to set correlation id to response. correlationId={}.", correlationId.yellow.asInstanceOf[Any])
+                log.info("Going to set correlation id to response. correlationId={}.", correlationId.asInstanceOf[Any])
                 prop.correlationId(correlationId)
               }
               prop.build()
@@ -103,7 +102,7 @@ class RpcSimulation extends Simulation {
           val user = session(USERNAME_KEY).as[String]
           if (false == msgBody.contains(user)) {
             log.warn("consumed msgBody={} as response for client {}. (this reply is not mine!)",
-              msgBody.red.asInstanceOf[Any], user.blue.asInstanceOf[Any])
+              msgBody.asInstanceOf[Any], user.asInstanceOf[Any])
             session.markAsFailed
           } else {
             log.debug("consumed msgBody={} as response for client {}.", msgBody.asInstanceOf[Any], user)

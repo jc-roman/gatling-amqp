@@ -1,34 +1,58 @@
 package io.gatling.amqp.infra
 
+import java.util.concurrent.{ArrayBlockingQueue, BlockingQueue, TimeUnit}
+
 import akka.actor._
 import com.rabbitmq.client.AMQP.BasicProperties
-import com.rabbitmq.client.QueueingConsumer.Delivery
 import com.rabbitmq.client._
 import io.gatling.amqp.config._
 import io.gatling.amqp.data._
 import io.gatling.amqp.event._
 import io.gatling.amqp.infra.AmqpConsumer.DeliveredMsg
 import io.gatling.core.session.Session
-import io.gatling.commons.util.TimeHelper.nowMillis
+import io.gatling.commons.util.ClockSingleton.nowMillis
 import io.gatling.core.action.Action
-import pl.project13.scala.rainbow._
 
 import scala.util._
 
-class AmqpConsumer(actorName: String)(implicit _amqp: AmqpProtocol) extends AmqpConsumerBase(actorName) {
-
-  private var _consumer: Option[QueueingConsumer] = None
-  private def consumer = _consumer.getOrElse{ throw new RuntimeException("[bug] consumer is not defined yet") }
+class AmqpConsumer(actorName: String)(implicit _amqp: AmqpProtocol) extends AmqpConsumerBase(actorName) with Consumer{
+  private var response: BlockingQueue[DeliveredMsg] = new ArrayBlockingQueue[DeliveredMsg](1);
+  //private var _consumer: Option[DefaultConsumer] = None
+  //private def consumer = _consumer.getOrElse{ throw new RuntimeException("[bug] consumer is not defined yet") }
   private var _consumerTag: Option[String] = None
 
   protected override def stopMessage: String = s"(delivered: $deliveredCount)"
+
+  override def handleDelivery(consumerTag: String, envelope: Envelope, properties: AMQP.BasicProperties, body: Array[Byte]): Unit = {
+    response.offer(DeliveredMsg(envelope, properties, body))
+  }
+
+  override def handleShutdownSignal(s: String, e: ShutdownSignalException): Unit = {
+    log.debug(s"handle Shutdown Signal(${_consumerTag.getOrElse("no value")})")
+  }
+
+  override def handleCancel(s: String): Unit = {
+    log.debug(s"handle Cancel(${_consumerTag.getOrElse("no value")})")
+  }
+
+  override def handleConsumeOk(s: String): Unit = {
+    log.debug(s"handle Consume Ok(${_consumerTag.getOrElse("no value")})")
+  }
+
+  override def handleRecoverOk(s: String): Unit = {
+    log.debug(s"handle Recover Ok(${_consumerTag.getOrElse("no value")})")
+  }
+
+  override def handleCancelOk(s: String): Unit = {
+    log.debug(s"handle Cancel Ok(${_consumerTag.getOrElse("no value")})")
+  }
 
   case class Delivered(startedAt: Long, stoppedAt: Long, delivery: DeliveredMsg)
   case class DeliveryTimeouted(msec: Long) extends RuntimeException
 
   override def preStart(): Unit = {
     super.preStart()
-    _consumer = Some(new QueueingConsumer(channel))
+    //_consumer = Some(new DefaultConsumer(channel))
   }
 
   private case class ConsumeRequested()
@@ -72,7 +96,7 @@ class AmqpConsumer(actorName: String)(implicit _amqp: AmqpProtocol) extends Amqp
   override def shutdown(): Unit = {
     _consumerTag.foreach(tag => {
       channel.basicCancel(tag)
-      log.debug(s"Cancel consumer($tag)".yellow)
+      log.debug(s"Cancel consumer($tag)")
     })
     context.become({case _ =>}, discardOld = true)
     context.stop(self)  // ignore all rest messages
@@ -154,9 +178,9 @@ class AmqpConsumer(actorName: String)(implicit _amqp: AmqpProtocol) extends Amqp
     * @param queueName
     */
   protected def justInitSyncConsumer(queueName: String) = {
-    val tag = channel.basicConsume(queueName, true, consumer)
+    val tag = channel.basicConsume(queueName, true, this)
     _consumerTag = Some(tag)
-    log.debug(s"Start basicConsume($queueName) [tag:$tag]".yellow)
+    log.debug(s"Start basicConsume($queueName) [tag:$tag]")
   }
 
   protected def consumeSync(queueName: String, session: Session, requestName: String): Unit = {
@@ -166,12 +190,12 @@ class AmqpConsumer(actorName: String)(implicit _amqp: AmqpProtocol) extends Amqp
 
   protected def tryNextDelivery(timeoutMsec: Long): Try[Delivered] = Try {
     lastRequestedAt = nowMillis
-    val nextDelivery: Delivery = consumer.nextDelivery(timeoutMsec)
+    val nextDelivery: DeliveredMsg = response.poll(timeoutMsec, TimeUnit.MILLISECONDS)
     if (nextDelivery == null) {
       throw DeliveryTimeouted(timeoutMsec)
     }
     lastDeliveredAt = nowMillis
-    Success(Delivered(lastRequestedAt, lastDeliveredAt, DeliveredMsg(nextDelivery)))
+    Success(Delivered(lastRequestedAt, lastDeliveredAt, nextDelivery))
   }.flatten
 
   protected def consumeAsync(req: ConsumeRequest): Unit = {
@@ -184,7 +208,7 @@ class AmqpConsumer(actorName: String)(implicit _amqp: AmqpProtocol) extends Amqp
   }
 
   protected def deliveryFailed(err: Throwable): Unit = {
-    log.warn(s"$actorName delivery failed: $err".yellow)
+    log.warn(s"$actorName delivery failed: $err")
   }
 
   protected def deliveryFound(delivered: Delivered, session: Session, descriptionWithRequestNameAlso: String): Unit = {
@@ -215,7 +239,7 @@ object AmqpConsumer {
   case class DeliveredMsg(envelope: Envelope, properties: AMQP.BasicProperties, body: Array[Byte])
 
   object DeliveredMsg {
-    def apply(delivery: com.rabbitmq.client.QueueingConsumer.Delivery): DeliveredMsg = new DeliveredMsg(delivery.getEnvelope, delivery.getProperties, delivery.getBody)
+    //def apply(delivery: com.rabbitmq.client.QueueingConsumer.Delivery): DeliveredMsg = new DeliveredMsg(delivery.getEnvelope, delivery.getProperties, delivery.getBody)
 
     def apply(getMsg: com.rabbitmq.client.GetResponse): DeliveredMsg = new DeliveredMsg(getMsg.getEnvelope, getMsg.getProps, getMsg.getBody)
   }

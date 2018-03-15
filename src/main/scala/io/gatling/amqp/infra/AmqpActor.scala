@@ -5,8 +5,6 @@ import com.rabbitmq.client.{AlreadyClosedException, Channel}
 import io.gatling.amqp.config._
 import io.gatling.amqp.infra.AmqpActor.ConnectionClosed
 import io.gatling.core.akka.BaseActor
-import pl.project13.scala.rainbow._
-
 import scala.util.{Failure, Success}
 
 abstract class AmqpActor(implicit amqp: AmqpProtocol) extends BaseActor {
@@ -21,7 +19,7 @@ abstract class AmqpActor(implicit amqp: AmqpProtocol) extends BaseActor {
   }
 
   override def preRestart(reason: Throwable, message: Option[Any]): Unit = {
-    logger.error(s"Actor $this crashed on message $message".red, reason)
+    logger.error(s"Actor $this crashed on message $message", reason)
     sys.exit(-1)
   }
 

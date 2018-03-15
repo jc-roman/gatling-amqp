@@ -18,7 +18,7 @@ object AmqpProtocol {
     type Components = AmqpComponents
     def protocolClass: Class[io.gatling.core.protocol.Protocol] = classOf[AmqpProtocol].asInstanceOf[Class[io.gatling.core.protocol.Protocol]]
 
-    def defaultValue(configuration: GatlingConfiguration): AmqpProtocol = AmqpProtocol(configuration)
+    def defaultProtocolValue(configuration: GatlingConfiguration): AmqpProtocol = AmqpProtocol(configuration)
 
     def newComponents(system: ActorSystem, coreComponents: CoreComponents): AmqpProtocol => AmqpComponents = {
       amqpProtocol => {

@@ -3,7 +3,6 @@ package io.gatling.amqp.config
 import akka.actor._
 import io.gatling.core.controller.throttle.Throttler
 import io.gatling.core.stats.{DataWritersStatsEngine, StatsEngine}
-import pl.project13.scala.rainbow._
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
@@ -22,9 +21,9 @@ trait AmqpRunner { this: AmqpProtocol =>
       case e: Throwable =>
         // maybe failed to declare queue like inequivalent args
         if (e.getCause() != null)
-          logger.error(s"failed: ${e.getCause}".red)
+          logger.error(s"failed: ${e.getCause}")
         else
-          logger.error(s"failed: $e".red, e)
+          logger.error(s"failed: $e", e)
     } finally {
       Await.result(system.terminate(), Duration.Inf)
      }

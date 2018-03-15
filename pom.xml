@@ -3,11 +3,11 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0">
     <modelVersion>4.0.0</modelVersion>
     <groupId>sc.ala</groupId>
-    <artifactId>gatling-amqp_2.11</artifactId>
+    <artifactId>gatling-amqp_2.12</artifactId>
     <packaging>jar</packaging>
     <description>Gatling AMQP support</description>
-    <url>https://github.com/maiha/gatling-amqp</url>
-    <version>0.9</version>
+    <url>https://github.com/silverxxx/gatling-amqp</url>
+    <version>0.0.10</version>
     <licenses>
         <license>
             <name>MIT License</name>
@@ -18,11 +18,11 @@
     <name>gatling-amqp</name>
     <organization>
         <name>sc.ala</name>
-        <url>https://github.com/maiha/gatling-amqp</url>
+        <url>https://github.com/silverxxx/gatling-amqp</url>
     </organization>
     <developers>
         <developer>
-            <id>maiha</id>
+            <id>silver</id>
             <name>Kazunori Nishi</name>
             <url>https://github.com/maiha</url>
         </developer>
@@ -31,10 +31,15 @@
             <name>Ľubomír Varga</name>
             <url>https://github.com/LuboVarga</url>
         </developer>
+        <developer>
+            <id>SilverXXX</id>
+            <name>Flavio Campana</name>
+            <url>https://github.com/SilverXXX</url>
+        </developer>
     </developers>
     <scm>
-        <url>https://github.com/LuboVarga/gatling-amqp</url>
-        <connection>scm:git:git@github.com:LuboVarga/gatling-amqp.git</connection>
+        <url>https://github.com/silverxxx/gatling-amqp</url>
+        <connection>scm:git:git@github.com:silverxxx/gatling-amqp.git</connection>
     </scm>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -50,27 +55,22 @@
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
-            <version>2.11.8</version>
+            <version>2.12.3</version>
         </dependency>
         <dependency>
             <groupId>io.gatling.highcharts</groupId>
             <artifactId>gatling-charts-highcharts</artifactId>
-            <version>2.2.2</version>
+            <version>2.3.0</version>
         </dependency>
         <dependency>
             <groupId>io.gatling</groupId>
             <artifactId>gatling-test-framework</artifactId>
-            <version>2.2.2</version>
+            <version>2.3.0</version>
         </dependency>
         <dependency>
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
-            <version>[3.5.1, 3.6.5]</version>
-        </dependency>
-        <dependency>
-            <groupId>pl.project13.scala</groupId>
-            <artifactId>rainbow_2.11</artifactId>
-            <version>0.2</version>
+            <version>5.2.0</version>
         </dependency>
     </dependencies>
 
@@ -170,7 +170,7 @@
                 <plugin>
                     <groupId>net.alchim31.maven</groupId>
                     <artifactId>scala-maven-plugin</artifactId>
-                    <version>3.2.2</version>
+                    <version>3.3.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>
