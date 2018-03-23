@@ -70,7 +70,7 @@ class AmqpPublisher(actorName: String)(implicit amqp: AmqpProtocol) extends Amqp
   def getData(session: Session, bytes: scala.Either[Expression[Array[Byte]], Array[Byte]]): Array[Byte] = {
     bytes match {
       case Left(l) => l.apply(session).get
-      case Right(r) => r
+      case Right(r) => session.attributes.foldLeft(new String(r))((a, b) => a.replaceAllLiterally("${" + b._1 + "}", b._2.toString)).getBytes()
     }
   }
 

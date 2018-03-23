@@ -23,11 +23,12 @@ class PublishingSimulation extends Simulation {
     .confirmMode()
 
   // val body = Array.fill[Byte](1000*10)(1) // 1KB data for test
-  val body = "{'x':1}"
+  val body = "{'x':1, bar: ${mykey}}}"
   //val req = PublishRequestAsync("q1", body).persistent
 
   val scn  = scenario("AMQP Publish(ack)").repeat(1000) {
-    exec(amqp("Publish").publish("gatlingPublishingSimulation", body = Right(body)))
+      exec(session => {session.set("mykey", "2")}).
+      exec(amqp("Publish").publish("gatlingPublishingSimulation", body = Right(body)))
   }
 
   setUp(scn.inject(rampUsers(3) over (1 seconds))).protocols(amqpProtocol)
