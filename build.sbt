@@ -8,23 +8,20 @@ scalacOptions := Seq(
 
 val gatlingVersion = "2.3.0"
 
-xerial.sbt.Sonatype.sonatypeRootSettings
-
 // Maven Publishing
 // http://www.scala-sbt.org/0.13/docs/Using-Sonatype.html
 
-publishMavenStyle := true
-// just run sbt publish; (or experiment with sbt publishLocaly)
-publishTo := Some(Resolver.file("file", new File(Path.userHome.absolutePath + "/.m2/repository")))
+//publishMavenStyle := true
+// just run sbt publish; (or experiment with sbt publishLocal)
 
-version := "0.0.10-SNAPSHOT"
-organization := "sc.ala"
-name := "gatling-amqp"
-description := "Gatling AMQP support"
-homepage := Some(url("https://github.com/maiha/gatling-amqp"))
-licenses := Seq("MIT License" -> url("http://www.opensource.org/licenses/mit-license.php"))
+version := "0.0.10"
+organization := "com.github.jc-roman"
+//name := "gatling-amqp"
+//description := "Gatling AMQP support"
+//homepage := Some(url("https://github.com/maiha/gatling-amqp"))
+//licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 
-pomExtra := (
+pomExtra :=
      <developers>
         <developer>
           <id>maiha</id>
@@ -41,13 +38,19 @@ pomExtra := (
          <name>Flavio Campana</name>
          <url>https://github.com/SilverXXX</url>
        </developer>
+       <developer>
+         <id>jc-roman</id>
+         <name>Juan Carlos Roman</name>
+         <url>https://github.com/jc-roman</url>
+       </developer>
       </developers>
       <scm>
-        <url>https://github.com/SilverXXX/gatling-amqp</url>
-        <connection>scm:git:git@github.com:SilverXXX/gatling-amqp.git</connection>
+        <url>https://github.com/jc-roman/gatling-amqp</url>
+        <connection>scm:git:git@github.com:jc-roman/gatling-amqp.git</connection>
       </scm>
-)
 
-libraryDependencies += "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingVersion
-libraryDependencies += "io.gatling"            % "gatling-test-framework"    % gatlingVersion
-libraryDependencies += "com.rabbitmq" % "amqp-client" % "5.2.0"
+libraryDependencies ++= Seq(
+  "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingVersion,
+  "io.gatling"            % "gatling-test-framework"    % gatlingVersion,
+  "com.rabbitmq"          % "amqp-client"               % "5.2.0"
+)
